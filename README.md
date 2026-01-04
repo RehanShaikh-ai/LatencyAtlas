@@ -1,5 +1,10 @@
 # NYC 311 SLA Analytics
 
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![DuckDB](https://img.shields.io/badge/DuckDB-Analytics-orange)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Work%20in%20Progress-yellow)
+
 A decision-oriented BI project analyzing SLA compliance and operational performance using real NYC 311 service request data.  
 Built with API-driven ingestion and a modern analytics-first architecture.
 
@@ -43,3 +48,11 @@ Power BI (visualization only)
   - SLA classification logic
   - Aggregated, BI-ready summary views
 
+## **👤 Author**
+
+**Rehan Abdul Gani Shaikh**
+**Data Science & ML Student | Python • Power BI | Building Real-World Data Projects**
+
+🔗 Connect with me:  [LinkedIn](https://www.linkedin.com/in/rehan-shaikh-68153a246)  
+
+📬 Email: rehansk.3107@gmail.com
