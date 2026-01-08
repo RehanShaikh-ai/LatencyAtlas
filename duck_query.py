@@ -38,9 +38,8 @@ CREATE OR REPLACE VIEW v_norm
 
 con.execute(
     """
-            SELECT normalized_status, status 
+            SELECT *
             FROM v_norm 
-            WHERE lower(status) = 'assigned' 
             LIMIT 10 """
 ).fetch_df()
 
@@ -54,3 +53,4 @@ con.execute( """SELECT
 FROM v_norm;
 
 """).fetchdf()
+

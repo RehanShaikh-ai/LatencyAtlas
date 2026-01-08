@@ -1,7 +1,10 @@
 from sodapy import Socrata
 import pandas as pd
+import os
+from dotenv import load_dotenv
 
-client = Socrata("data.cityofnewyork.us", app_token="QKhO8wnO3Ye0lGNoc1p0w2fLj")
+load_dotenv()
+client = Socrata("data.cityofnewyork.us", app_token=os.getenv('SOCRATA_APP_TOKEN'))
 
 query = """
 SELECT

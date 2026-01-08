@@ -1,3 +1,4 @@
 *.parquet
 *.duckdb
 *.wal
+.env
