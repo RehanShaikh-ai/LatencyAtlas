@@ -1,10 +1,11 @@
-from sodapy import Socrata
-import pandas as pd
 import os
+
+import pandas as pd
 from dotenv import load_dotenv
+from sodapy import Socrata
 
 load_dotenv()
-client = Socrata("data.cityofnewyork.us", app_token=os.getenv('SOCRATA_APP_TOKEN'))
+client = Socrata("data.cityofnewyork.us", app_token=os.getenv("SOCRATA_APP_TOKEN"))
 
 query = """
 SELECT
@@ -27,7 +28,4 @@ results = client.get("erm2-nwe9", query=query)
 
 df = pd.DataFrame.from_records(results)
 print(len(df))
-df.to_parquet('NYC311.parquet', index=False)
-
-
-
+df.to_parquet("NYC311.parquet", index=False)
