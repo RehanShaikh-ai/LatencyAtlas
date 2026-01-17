@@ -1,0 +1,5 @@
+duckdb
+sodapy
+dotenv
+pandas
+pathlib
