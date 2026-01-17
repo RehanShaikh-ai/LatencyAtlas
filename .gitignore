@@ -2,3 +2,5 @@
 *.duckdb
 *.wal
 .env
+*.log
+logs/

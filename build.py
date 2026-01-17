@@ -1,14 +1,49 @@
-import duckdb
+import logging
 from pathlib import Path
 
-con = duckdb.connect('nyc_311.duckdb')
+import duckdb
 
-scripts = ['sql/01_raw_views.sql', 'sql/02_norm_views.sql', 'sql/03_sla_base_views.sql', 'sql/04_sla_compliance_views.sql']
+# <------------logging setup------------>
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+    handlers=[logging.FileHandler("logs/build.log"), logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
 
-for script in scripts:
-    print("Running build")
-    sql = Path(script).read_text()
-    con.execute(sql)
+DB_PATH = "nyc_311.duckdb"
+SQL_DIR = Path("sql")
 
-con.close()
-print("Build completed")
+
+# <------------build logic------------>
+def main():
+
+    logger.info("======================================================")
+    logger.info("Starting build")
+
+    try:
+        con = duckdb.connect(DB_PATH)
+
+        SCRIPTS = [
+            "01_raw_views.sql",
+            "02_norm_views.sql",
+            "03_sla_base_views.sql",
+            "04_sla_compliance_views.sql",
+        ]
+
+        for n, script in zip(range(1, len(SCRIPTS) + 1), SCRIPTS):
+            path = SQL_DIR / script
+            logger.info(f"Running build...Executing script {n}/{len(SCRIPTS)}")
+
+            sql = path.read_text()
+            con.execute(sql)
+
+        con.close()
+        logger.info("Build completed !")
+
+    except Exception as e:
+        logger.error("Build failed", exc_info=True)
+        raise e
+
+if __name__ == '__main__':
+    main()
