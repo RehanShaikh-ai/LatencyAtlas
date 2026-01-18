@@ -50,6 +50,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)  # creates the data directory
 FILE_NAME = "/NYC311.parquet"
 path = DATA_DIR / FILE_NAME  # final location of the file
 
+
 def main():
     try:
 
@@ -64,7 +65,7 @@ def main():
     except Exception as e:
         logger.error("Data fetch failed", exc_info=True)
         raise e
-    
-if __name__ == '__main__':
-    main()
 
+
+if __name__ == "__main__":
+    main()
