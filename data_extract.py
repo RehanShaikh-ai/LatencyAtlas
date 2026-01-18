@@ -6,7 +6,10 @@ import pandas as pd
 from dotenv import load_dotenv
 from sodapy import Socrata  # API library for data
 
+load_dotenv()  # load .env with env variables
+
 Path("logs").mkdir(exist_ok=True)
+
 # configuring logging format
 logging.basicConfig(
     level=logging.INFO,
@@ -16,9 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-load_dotenv()  # load .env with app token
 client = Socrata("data.cityofnewyork.us", app_token=os.getenv("SOCRATA_APP_TOKEN"))
-
 
 # <------------fetch data from 2021-2025------------>
 query = """
@@ -37,10 +38,17 @@ SELECT
 ORDER BY created_date DESC
 LIMIT 20000000 
 """
+
 # Data directory and filename
-DATA_DIR = Path("data")
+DATA_ROOT = Path(os.getenv("DATA_ROOT"))  # fetches from .env
+DATA_DIR = DATA_ROOT / "data"
+
+if not DATA_ROOT:  # directory check
+    raise RuntimeError("DATA_ROOT not defined")
+
+DATA_DIR.mkdir(parents=True, exist_ok=True)  # creates the data directory
 FILE_NAME = "NYC311.parquet"
-path = DATA_DIR / FILE_NAME
+path = DATA_DIR / FILE_NAME  # final location of the file
 
 try:
 

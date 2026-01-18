@@ -1,7 +1,11 @@
 import logging
+import os
 from pathlib import Path
 
 import duckdb
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # <------------logging setup------------>
 Path("logs").mkdir(exist_ok=True)
@@ -12,6 +16,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+DATA_ROOT = os.getenv("DATA_ROOT")
+if not DATA_ROOT:
+    raise RuntimeError("DATA_ROOT not defined")
 DB_PATH = "nyc_311.duckdb"
 SQL_DIR = Path("sql")
 
@@ -24,6 +32,7 @@ def main():
 
     try:
         con = duckdb.connect(DB_PATH)
+        con.execute(f"SET VARIABLE data_root = '{DATA_ROOT}/data'")
 
         SCRIPTS = [
             "01_raw_views.sql",
