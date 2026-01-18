@@ -41,25 +41,30 @@ LIMIT 20000000
 
 # Data directory and filename
 DATA_ROOT = Path(os.getenv("DATA_ROOT"))  # fetches from .env
-DATA_DIR = DATA_ROOT / "data"
+DATA_DIR = DATA_ROOT / "/data"
 
 if not DATA_ROOT:  # directory check
     raise RuntimeError("DATA_ROOT not defined")
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)  # creates the data directory
-FILE_NAME = "NYC311.parquet"
+FILE_NAME = "/NYC311.parquet"
 path = DATA_DIR / FILE_NAME  # final location of the file
 
-try:
+def main():
+    try:
 
-    logger.info("Extracting data...")
-    results = client.get("erm2-nwe9", query=query)
+        logger.info("Extracting data...")
+        results = client.get("erm2-nwe9", query=query)
 
-    logger.info("Converting to PARQUET format...")
-    df = pd.DataFrame.from_records(results)  # convert to DataFrame
-    df.to_parquet(path, index=False)  # Convert to PARQUET format for faster read
-    logger.info(f"Data fetch completed ! Data saved at {path}")
+        logger.info("Converting to PARQUET format...")
+        df = pd.DataFrame.from_records(results)  # convert to DataFrame
+        df.to_parquet(path, index=False)  # Convert to PARQUET format for faster read
+        logger.info(f"Data fetch completed ! Data saved at {path}")
 
-except Exception as e:
-    logger.error("Data fetch failed", exc_info=True)
-    raise e
+    except Exception as e:
+        logger.error("Data fetch failed", exc_info=True)
+        raise e
+    
+if __name__ == '__main__':
+    main()
+
