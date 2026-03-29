@@ -40,14 +40,14 @@ LIMIT 20000000
 """
 
 # Data directory and filename
-DATA_ROOT = Path(os.getenv("DATA_ROOT"))  # fetches from .env
-DATA_DIR = DATA_ROOT / "/data"
-
-if not DATA_ROOT:  # directory check
+DATA_ROOT = os.getenv("DATA_ROOT")
+if not DATA_ROOT:
     raise RuntimeError("DATA_ROOT not defined")
+DATA_ROOT = Path(DATA_ROOT)
+DATA_DIR = DATA_ROOT / "data"
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)  # creates the data directory
-FILE_NAME = "/NYC311.parquet"
+FILE_NAME = "NYC311.parquet"
 path = DATA_DIR / FILE_NAME  # final location of the file
 
 
