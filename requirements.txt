@@ -1,5 +1,8 @@
 duckdb
 sodapy
-dotenv
+python-dotenv
 pandas
-pathlib
+pyarrow
+flask
+flask-cors
+mysql-connector-python

@@ -4,24 +4,22 @@ from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
-from sodapy import Socrata  # API library for data
+from sodapy import Socrata
 
-load_dotenv()  # load .env with env variables
+_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=_ROOT / ".env")
 
-Path("logs").mkdir(exist_ok=True)
+(_ROOT / "logs").mkdir(exist_ok=True)
 
-# configuring logging format
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s",
-    handlers=[logging.FileHandler("logs/data_fetch.log"), logging.StreamHandler()],
+    handlers=[logging.FileHandler(_ROOT / "logs/data_fetch.log"), logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
-
 client = Socrata("data.cityofnewyork.us", app_token=os.getenv("SOCRATA_APP_TOKEN"))
 
-# <------------fetch data from 2021-2025------------>
 query = """
 SELECT
   unique_key,
@@ -36,31 +34,29 @@ SELECT
   WHERE created_date
   BETWEEN '2021-01-01T00:00:00' AND '2026-01-01T00:00:00'
 ORDER BY created_date DESC
-LIMIT 20000000 
+LIMIT 20000000
 """
 
-# Data directory and filename
 DATA_ROOT = os.getenv("DATA_ROOT")
 if not DATA_ROOT:
     raise RuntimeError("DATA_ROOT not defined")
 DATA_ROOT = Path(DATA_ROOT)
 DATA_DIR = DATA_ROOT / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-DATA_DIR.mkdir(parents=True, exist_ok=True)  # creates the data directory
 FILE_NAME = "NYC311.parquet"
-path = DATA_DIR / FILE_NAME  # final location of the file
+path = DATA_DIR / FILE_NAME
 
 
 def main():
     try:
-
         logger.info("Extracting data...")
         results = client.get("erm2-nwe9", query=query)
 
         logger.info("Converting to PARQUET format...")
-        df = pd.DataFrame.from_records(results)  # convert to DataFrame
-        df.to_parquet(path, index=False)  # Convert to PARQUET format for faster read
-        logger.info(f"Data fetch completed ! Data saved at {path}")
+        df = pd.DataFrame.from_records(results)
+        df.to_parquet(path, index=False)
+        logger.info(f"Data fetch completed! Data saved at {path}")
 
     except Exception as e:
         logger.error("Data fetch failed", exc_info=True)

@@ -26,7 +26,17 @@ This project prioritizes analytical correctness and governance over visual story
 - Raw data is ingested via authenticated API access and stored without transformation.
 
 ## Architecture
-![data pipeline](images/pipeline.png)
+![data pipeline](docs/images/pipeline.png)
+
+## Repository layout
+
+| Path | Purpose |
+|------|---------|
+| `api.py`, `dashboard.html` | Flask API and dashboard UI |
+| `build.py`, `data_extract.py` | Parquet ingest and DuckDB build |
+| `sql/` | Layered SQL views for DuckDB |
+| `static/img/` | Dashboard images (served at `/static/img/…` when using `python api.py`) |
+| `docs/images/` | README and doc assets |
 
 ## Storage Strategy
 
