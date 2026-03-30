@@ -35,7 +35,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=str(_ROOT / "static"), static_url_path="/static")
 CORS(app)
 
 MYSQL_CONFIG = {
@@ -136,101 +136,18 @@ def duckdb_query(con: duckdb.DuckDBPyConnection, sql: str) -> list[dict]:
 
 
 def build_payload_mysql() -> dict:
-    sla_rows = mysql_query(
-        """
-            SELECT
-                SUM(total_requests)   AS total,
-                SUM(compliant_count)  AS compliant,
-                SUM(breached_count)   AS breached,
-                ROUND(
-                    100.0 * SUM(compliant_count) / NULLIF(SUM(total_requests), 0),
-                    2
-                ) AS compliance_rate
-            FROM sla_summary
-        """
-    )
+    sla_rows = mysql_query("SELECT total_requests AS total, compliant, breached, compliance_rate FROM kpi_summary LIMIT 1")
     sla = sla_rows[0] if sla_rows else {}
 
-    borough_rows = mysql_query(
-        """
-            SELECT
-                borough,
-                SUM(total_requests)  AS total,
-                SUM(breached_count)  AS breached,
-                ROUND(
-                    100.0 * SUM(breached_count) / NULLIF(SUM(total_requests), 0),
-                    2
-                ) AS breach_rate
-            FROM sla_summary
-            WHERE borough IS NOT NULL AND borough != 'Unspecified'
-            GROUP BY borough
-            ORDER BY breach_rate DESC
-        """
-    )
+    borough_rows = mysql_query("SELECT borough, total, breached, breach_rate FROM borough_breach ORDER BY breach_rate DESC")
 
-    agency_rows = mysql_query(
-        """
-            SELECT
-                agency_name,
-                SUM(total_requests)  AS total,
-                SUM(breached_count)  AS breached,
-                ROUND(
-                    100.0 * SUM(breached_count) / NULLIF(SUM(total_requests), 0),
-                    2
-                ) AS breach_rate
-            FROM sla_summary
-            GROUP BY agency_name
-            ORDER BY breached DESC
-            LIMIT 6
-        """
-    )
+    agency_rows = mysql_query("SELECT agency_name, total, breached, breach_rate FROM agency_breach ORDER BY breached DESC")
 
-    variability_rows = mysql_query(
-        """
-            SELECT
-                borough,
-                ROUND(AVG(avg_resolution_hours), 2) AS avg_hrs,
-                ROUND(AVG(stddev_resolution_hours), 2) AS stddev_hrs,
-                MIN(min_hours) AS min_hrs,
-                MAX(max_hours) AS max_hrs
-            FROM response_variability
-            WHERE borough IS NOT NULL AND borough != 'Unspecified'
-            GROUP BY borough
-            ORDER BY avg_hrs DESC
-        """
-    )
+    variability_rows = mysql_query("SELECT borough, avg_hrs, stddev_hrs, min_hrs, max_hrs FROM response_variability ORDER BY avg_hrs DESC")
 
-    complaint_rows = mysql_query(
-        """
-            SELECT
-                complaint_type,
-                SUM(total_requests)  AS total,
-                SUM(breached_count)  AS breached,
-                ROUND(
-                    100.0 * SUM(breached_count) / NULLIF(SUM(total_requests), 0),
-                    2
-                ) AS breach_rate
-            FROM sla_summary
-            GROUP BY complaint_type
-            ORDER BY total DESC
-            LIMIT 8
-        """
-    )
+    complaint_rows = mysql_query("SELECT complaint_type, total, breached, breach_rate FROM complaint_types ORDER BY total DESC")
 
-    trend_rows = mysql_query(
-        """
-            SELECT
-                DATE_FORMAT(last_updated, '%Y-%m') AS month,
-                ROUND(
-                    100.0 * SUM(compliant_count) / NULLIF(SUM(total_requests), 0),
-                    2
-                ) AS compliance_rate
-            FROM sla_summary
-            GROUP BY month
-            ORDER BY month ASC
-            LIMIT 12
-        """
-    )
+    trend_rows = mysql_query("SELECT month, compliance_rate FROM monthly_trend ORDER BY month ASC")
 
     return _assemble_payload(
         sla,
@@ -342,7 +259,6 @@ def build_payload_duckdb(con: duckdb.DuckDBPyConnection) -> dict:
         FROM v_sla
         GROUP BY month
         ORDER BY month ASC
-        LIMIT 12
         """,
     )
 

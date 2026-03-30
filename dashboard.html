@@ -867,9 +867,11 @@ function render(data) {
     total >= 1_000_000 ? (total / 1_000_000).toFixed(1) + 'M' :
     total >= 1_000     ? Math.round(total / 1_000) + 'K' : total;
 
-  // breach rate
-  const br = parseFloat(kpi.breach_rate) || 0;
-  document.getElementById('breach-big').textContent = br.toFixed(1) + '%';
+  // breach rate — only update if 'All' pill is active (no year filter applied)
+  if (!document.querySelector('.year-pill.active') || document.querySelector('.year-pill.active')?.textContent === 'All') {
+    const br = parseFloat(kpi.breach_rate) || 0;
+    document.getElementById('breach-big').textContent = br.toFixed(1) + '%';
+  }
   document.getElementById('breach-change').innerHTML =
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" width="10" height="10"><polyline points="23,18 13.5,8.5 8.5,13.5 1,6"/><polyline points="17,18 23,18 23,12"/></svg> −3.1%`;
 
@@ -1029,13 +1031,21 @@ function filterBreachYear(year, btn) {
   document.querySelectorAll('.year-pill').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   if (!cachedData) return;
+  if (!year) {
+    // All — use exact KPI breach rate
+    const br = parseFloat(cachedData.kpi?.breach_rate || 0);
+    document.getElementById('breach-big').textContent = br.toFixed(1) + '%';
+    return;
+  }
   const trend = cachedData.trend || [];
-  const filtered = year ? trend.filter(r => r.month && r.month.startsWith(String(year))) : trend;
-  const source = filtered.length ? filtered : trend;
-  const rates = source.map(r => parseFloat(r.compliance_rate || 0)).filter(v => v > 0);
-  const avgCompliance = rates.length ? rates.reduce((a,b) => a+b, 0) / rates.length : parseFloat(cachedData.kpi?.compliance_rate || 0);
-  const br = (100 - avgCompliance).toFixed(1);
-  document.getElementById('breach-big').textContent = br + '%';
+  const filtered = trend.filter(r => r.month && r.month.startsWith(String(year)));
+  if (!filtered.length) {
+    document.getElementById('breach-big').textContent = 'N/A';
+    return;
+  }
+  const rates = filtered.map(r => parseFloat(r.compliance_rate || 0)).filter(v => v > 0);
+  const avgCompliance = rates.reduce((a, b) => a + b, 0) / rates.length;
+  document.getElementById('breach-big').textContent = (100 - avgCompliance).toFixed(1) + '%';
 }
 
 /* ━━━━ PAGE SWITCHING ━━━━ */
